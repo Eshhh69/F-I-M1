@@ -1,0 +1,110 @@
+# File Integrity Monitoring (FIM) System
+
+## Overview
+
+This project is a Python-based File Integrity Monitoring (FIM) system that continuously monitors files within a specified directory and detects unauthorized changes. The system uses SHA-256 hashing to verify file integrity and generates alerts whenever files are modified, created, or deleted.
+
+## Features
+
+* SHA-256 based file integrity verification
+* Baseline creation for monitored files
+* Real-time monitoring of files
+* Detection of file modifications
+* Detection of newly created files
+* Detection of deleted files
+* Automatic baseline updates after changes
+* Timestamped security alerts
+
+## Project Workflow
+
+### Step 1: Project Setup
+
+Created the project structure containing:
+
+* `monitor.py`
+* `baseline.json`
+* `monitored_folder`
+
+### Step 2: Hash Generation
+
+Implemented a SHA-256 hashing function using Python's `hashlib` library to generate unique hashes for each file.
+
+### Step 3: Folder Scanning
+
+Developed a folder scanning mechanism that:
+
+* Reads all files in the monitored directory
+* Calculates hashes for each file
+* Stores file names and hashes in a dictionary
+
+### Step 4: Baseline Creation
+
+Generated an initial baseline by:
+
+* Scanning all files
+* Computing their SHA-256 hashes
+* Saving the results in `baseline.json`
+
+This baseline represents the trusted state of the monitored files.
+
+### Step 5: Continuous Monitoring
+
+Implemented a monitoring loop that:
+
+* Scans the folder every 5 seconds
+* Compares current file hashes with baseline hashes
+* Identifies integrity violations
+
+### Step 6: Change Detection
+
+Added logic to detect:
+
+* File Modifications
+* New File Creation
+* File Deletion
+
+### Step 7: Alert Generation
+
+Implemented timestamped alerts to notify users whenever a file integrity event occurs.
+
+Example:
+
+[2026-06-09 09:30:15] [ALERT] File Modified: file1.txt
+
+### Step 8: Dynamic Baseline Updates
+
+Enhanced the system to automatically update the baseline after detecting changes, preventing repeated alerts for the same event.
+
+## Technologies Used
+
+* Python
+* hashlib
+* json
+* os
+* time
+* datetime
+
+## Learning Outcomes
+
+Through this project, the following cybersecurity concepts were explored:
+
+* Cryptographic Hashing
+* File Integrity Monitoring
+* Security Event Detection
+* Continuous Monitoring
+* Incident Logging
+* Blue Team Security Fundamentals
+
+## Future Enhancements
+
+* Log file generation
+* Email notifications
+* GUI dashboard
+* SQLite database integration
+* VirusTotal API integration
+* PDF incident reports
+
+## Author
+
+Eshan Sharma
+B.Tech Cybersecurity Graduate
