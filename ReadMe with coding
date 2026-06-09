@@ -1,0 +1,316 @@
+# File Integrity Monitoring (FIM) System
+
+## Step 1: Import Required Libraries
+
+We imported the necessary Python libraries for hashing, file handling, JSON storage, monitoring, and timestamps.
+
+```python
+import hashlib
+import os
+import json
+import time
+from datetime import datetime
+```
+
+---
+
+# Step 2: Create SHA-256 Hash Function
+
+This function generates a unique SHA-256 hash for each file.
+
+```python
+def calculate_hash(file_path):
+    sha256 = hashlib.sha256()
+
+    with open(file_path, "rb") as f:
+        while chunk := f.read(4096):
+            sha256.update(chunk)
+
+    return sha256.hexdigest()
+```
+
+Purpose:
+
+* Detect changes in file contents.
+* Verify file integrity.
+
+---
+
+# Step 3: Scan the Folder
+
+This function scans all files inside the monitored folder and stores their hashes.
+
+```python
+def scan_folder(folder_path):
+    hashes = {}
+
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+
+        if os.path.isfile(file_path):
+            hashes[file_name] = calculate_hash(file_path)
+
+    return hashes
+```
+
+Purpose:
+
+* Collect all file hashes.
+* Create a snapshot of the folder state.
+
+---
+
+# Step 4: Generate Initial Baseline
+
+The baseline stores the trusted hashes of all files.
+
+```python
+folder = "monitored_folder"
+
+baseline = scan_folder(folder)
+
+with open("baseline.json", "w") as f:
+    json.dump(baseline, f, indent=4)
+
+print("Baseline created successfully!")
+```
+
+Output:
+
+```text
+Baseline created successfully!
+```
+
+Purpose:
+
+* Establish the initial trusted state of files.
+
+---
+
+# Step 5: Load the Baseline
+
+When monitoring starts, the baseline is loaded from the JSON file.
+
+```python
+folder = "monitored_folder"
+
+with open("baseline.json", "r") as f:
+    baseline = json.load(f)
+```
+
+Purpose:
+
+* Compare future scans against the trusted baseline.
+
+---
+
+# Step 6: Start Continuous Monitoring
+
+An infinite loop continuously scans the folder every 5 seconds.
+
+```python
+print("Monitoring started...")
+
+while True:
+    current = scan_folder(folder)
+
+    time.sleep(5)
+```
+
+Purpose:
+
+* Enable real-time monitoring.
+
+---
+
+# Step 7: Detect New Files
+
+Check whether a file exists in the current scan but not in the baseline.
+
+```python
+if file_name not in baseline:
+    alert = f"[{datetime.now()}] [ALERT] New File Created: {file_name}"
+    print(alert)
+
+    baseline[file_name] = current_hash
+```
+
+Example Output:
+
+```text
+[2026-06-09 09:30:10] [ALERT] New File Created: hacker.txt
+```
+
+---
+
+# Step 8: Detect Modified Files
+
+Compare current file hash with baseline hash.
+
+```python
+elif baseline[file_name] != current_hash:
+    alert = f"[{datetime.now()}] [ALERT] File Modified: {file_name}"
+    print(alert)
+
+    baseline[file_name] = current_hash
+```
+
+Example Output:
+
+```text
+[2026-06-09 09:31:15] [ALERT] File Modified: file1.txt
+```
+
+---
+
+# Step 9: Detect Deleted Files
+
+Check whether a file from the baseline is missing in the current scan.
+
+```python
+for file_name in list(baseline.keys()):
+
+    if file_name not in current:
+        alert = f"[{datetime.now()}] [ALERT] File Deleted: {file_name}"
+        print(alert)
+
+        del baseline[file_name]
+```
+
+Example Output:
+
+```text
+[2026-06-09 09:32:22] [ALERT] File Deleted: notes.txt
+```
+
+---
+
+# Step 10: Save Updated Baseline
+
+After every scan, save changes back to the baseline file.
+
+```python
+with open("baseline.json", "w") as f:
+    json.dump(baseline, f, indent=4)
+```
+
+Purpose:
+
+* Prevent repeated alerts.
+* Keep monitoring data updated.
+
+---
+
+# Step 11: Complete Monitoring Loop
+
+Final monitoring logic:
+
+```python
+while True:
+    current = scan_folder(folder)
+
+    for file_name, current_hash in current.items():
+
+        if file_name not in baseline:
+            alert = f"[{datetime.now()}] [ALERT] New File Created: {file_name}"
+            print(alert)
+
+            baseline[file_name] = current_hash
+
+        elif baseline[file_name] != current_hash:
+            alert = f"[{datetime.now()}] [ALERT] File Modified: {file_name}"
+            print(alert)
+
+            baseline[file_name] = current_hash
+
+    for file_name in list(baseline.keys()):
+
+        if file_name not in current:
+            alert = f"[{datetime.now()}] [ALERT] File Deleted: {file_name}"
+            print(alert)
+
+            del baseline[file_name]
+
+    with open("baseline.json", "w") as f:
+        json.dump(baseline, f, indent=4)
+
+    time.sleep(5)
+```
+
+---
+
+# Step 12: Testing
+
+### Test 1: Modify a File
+
+Edited:
+
+```text
+file1.txt
+```
+
+Result:
+
+```text
+[ALERT] File Modified: file1.txt
+```
+
+### Test 2: Create a File
+
+Created:
+
+```text
+hacker.txt
+```
+
+Result:
+
+```text
+[ALERT] New File Created: hacker.txt
+```
+
+### Test 3: Delete a File
+
+Deleted:
+
+```text
+notes.txt
+```
+
+Result:
+
+```text
+[ALERT] File Deleted: notes.txt
+```
+
+---
+
+# Final Outcome
+
+Successfully developed a File Integrity Monitoring (FIM) system that:
+
+* Uses SHA-256 hashing for integrity verification
+* Creates and maintains a trusted baseline
+* Detects file modifications
+* Detects file creation
+* Detects file deletion
+* Generates timestamped alerts
+* Continuously monitors files in real time
+
+## Technologies Used
+
+* Python
+* hashlib
+* os
+* json
+* datetime
+* time
+
+## Cybersecurity Concepts Learned
+
+* Cryptographic Hashing
+* File Integrity Monitoring
+* Security Monitoring
+* Incident Detection
+* Baseline Management
+* Blue Team Operations
